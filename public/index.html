@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Faceit Stats Viewer</title>
+    <style>
+      :root{--bg:#0b0f14;--panel:#0f1720;--muted:#98a0ab;--accent:#7cf9ff;--neon:#6ef1a7}
+      html,body{height:100%}
+      body{font-family:Inter,system-ui,Arial,Helvetica;margin:0;padding:28px;background:radial-gradient(1200px 600px at 10% 10%, rgba(124,249,255,0.04), transparent), linear-gradient(180deg,#020406 0%, #071017 100%);color:#e6eef6;overflow:hidden}
+      .app-wrap{position:relative;z-index:2;max-width:980px;margin:0 auto}
+      input,button{padding:10px 12px;font-size:14px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit}
+      button{cursor:pointer}
+      .card{border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;margin-top:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+      .muted{color:var(--muted);font-size:13px}
+      .summary{display:flex;gap:14px;align-items:center}
+      .avatar{width:96px;height:96px;border-radius:12px;object-fit:cover;border:2px solid rgba(124,249,255,0.08);box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+      .meta{display:flex;flex-direction:column}
+      .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+      .stat{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:12px;border-radius:8px;text-align:center;font-size:14px;border:1px solid rgba(255,255,255,0.03)}
+      .maps{margin-top:12px}
+      .maps li{margin-bottom:6px}
+      h1{margin:0 0 6px 0;color:var(--accent);text-shadow:0 4px 20px rgba(124,249,255,0.04)}
+      .search-row{display:flex;gap:8px;align-items:center}
+      canvas#bg-canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
+      .logo{display:inline-flex;align-items:center;gap:10px}
+      .logo .sig{font-weight:700;color:var(--neon);letter-spacing:0.6px}
+      .footer-note{margin-top:8px;color:var(--muted);font-size:13px}
+    </style>
+  </head>
+  <body>
+    <h1>Faceit Stats Viewer</h1>
+    <p class="muted">Enter a Faceit player nickname to view their CS2 stats.</p>
+
+    <div class="app-wrap">
+      <div class="logo"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="4" stroke="rgba(124,249,255,0.15)" stroke-width="1.2" fill="rgba(124,249,255,0.02)"/><path d="M7 12h10" stroke="rgba(110,241,167,0.9)" stroke-width="1.6" stroke-linecap="round"/></svg><div><div style="font-size:16px">Faceit Stats</div><div class="sig" style="font-size:12px">Viewer</div></div></div>
+
+      <h1>Faceit Stats Viewer</h1>
+      <p class="muted">Enter a Faceit player nickname to view their CS:GO stats.</p>
+
+      <form id="searchForm" class="search-row card">
+        <input id="nick" placeholder="nickname" autocomplete="off" />
+        <button type="submit">Search</button>
+        <label style="margin-left:8px;display:flex;align-items:center;color:var(--muted)">Sort:
+          <select id="sortSelect" style="margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit;padding:6px;border-radius:6px">
+            <option value="matches">Matches</option>
+            <option value="kd">K/D</option>
+            <option value="adr">ADR</option>
+          </select>
+        </label>
+        <button id="dashboardBtn" type="button" style="margin-left:12px">DHL stats</button>
+      </form>
+
+      <div id="result"></div>
+      <div class="footer-note">Dark theme • Neon accents • Background animation</div>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
