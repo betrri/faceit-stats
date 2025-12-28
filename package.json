@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "description": "Simple web page + backend to show Faceit player stats",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "echo \"This project is now static. Open index.html in your browser.\""
   },
-  "dependencies": {
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "node-fetch": "^2.6.7"
-  }
+  "dependencies": {}
 }

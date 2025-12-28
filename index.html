@@ -38,6 +38,14 @@
       <h1>Faceit Stats Viewer</h1>
       <p class="muted">Enter a Faceit player nickname to view their CS:GO stats.</p>
 
+      <div class="card" style="margin-bottom:12px;padding:12px">
+        <label class="muted">Faceit API key:
+          <input id="apiKey" placeholder="Paste FACEIT API key here" autocomplete="off" style="margin-left:8px;width:60%" />
+          <button id="saveApiKey" type="button" style="margin-left:8px">Save</button>
+        </label>
+        <div class="muted" style="margin-top:8px;font-size:13px">Stored locally in browser localStorage — do not share this key publicly.</div>
+      </div>
+
       <form id="searchForm" class="search-row card">
         <input id="nick" placeholder="nickname" autocomplete="off" />
         <button type="submit">Search</button>

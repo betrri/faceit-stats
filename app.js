@@ -1,6 +1,21 @@
 const form = document.getElementById('searchForm');
 const nickInput = document.getElementById('nick');
 const result = document.getElementById('result');
+const apiKeyInput = document.getElementById('apiKey');
+const saveApiKeyBtn = document.getElementById('saveApiKey');
+
+const FACEIT_BASE = 'https://open.faceit.com/data/v4';
+
+function getApiKey(){ return localStorage.getItem('FACEIT_API_KEY') || ''; }
+function setApiKey(v){ if (v) localStorage.setItem('FACEIT_API_KEY', v); else localStorage.removeItem('FACEIT_API_KEY'); }
+
+if (apiKeyInput) apiKeyInput.value = getApiKey();
+if (saveApiKeyBtn){
+  saveApiKeyBtn.addEventListener('click', ()=>{
+    setApiKey(apiKeyInput.value.trim());
+    alert('API key saved to localStorage.');
+  });
+}
 
 // Background particle animation (subtle gaming neon effect)
 ;(function initParticles(){
@@ -74,15 +89,27 @@ form.addEventListener('submit', async (e) => {
   const nick = nickInput.value.trim();
   if (!nick) return;
   result.innerHTML = 'Loading...';
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    result.innerHTML = '<div class="card">Set your Faceit API key above before searching.</div>';
+    return;
+  }
   try {
-    const resp = await fetch(`/api/player?nickname=${encodeURIComponent(nick)}`);
-    if (!resp.ok) {
-      const txt = await resp.text();
-      result.innerHTML = `<div class="card">Error: ${resp.status} ${txt}</div>`;
+    const headers = { 'Authorization': `Bearer ${apiKey}` };
+    const pResp = await fetch(`${FACEIT_BASE}/players?nickname=${encodeURIComponent(nick)}`, { headers });
+    if (!pResp.ok) {
+      const txt = await pResp.text();
+      result.innerHTML = `<div class="card">Error: ${pResp.status} ${txt}</div>`;
       return;
     }
-    const data = await resp.json();
-    render(data);
+    const player = await pResp.json();
+    const playerId = player.player_id || player.playerId || player.id;
+    let stats = null;
+    if (playerId){
+      const statsResp = await fetch(`${FACEIT_BASE}/players/${playerId}/stats/cs2`, { headers });
+      stats = statsResp.ok ? await statsResp.json() : null;
+    }
+    render({ player, stats });
   } catch (err) {
     result.innerHTML = `<div class="card">Network error: ${err.message}</div>`;
   }
@@ -96,14 +123,28 @@ let lastDashboardResults = null;
 
 dashboardBtn.addEventListener('click', async () => {
   result.innerHTML = '<div class="card">Loading dashboard...</div>';
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    result.innerHTML = '<div class="card">Set your Faceit API key above before loading dashboard.</div>';
+    return;
+  }
   try {
-    const resp = await fetch(`/api/players?nicknames=${encodeURIComponent(DASH_NICKS.join(','))}`);
-    if (!resp.ok) {
-      result.innerHTML = `<div class="card">Error loading dashboard: ${resp.status}</div>`;
-      return;
-    }
-    const data = await resp.json();
-    lastDashboardResults = data.results || [];
+    const headers = { 'Authorization': `Bearer ${apiKey}` };
+    const results = await Promise.all(DASH_NICKS.map(async (nick) => {
+      try {
+        const pResp = await fetch(`${FACEIT_BASE}/players?nickname=${encodeURIComponent(nick)}`, { headers });
+        if (!pResp.ok) return { nickname: nick, error: `player_lookup_failed:${pResp.status}` };
+        const player = await pResp.json();
+        const playerId = player.player_id || player.playerId || player.id;
+        if (!playerId) return { nickname: nick, error: 'player_id_missing', player };
+        const statsResp = await fetch(`${FACEIT_BASE}/players/${playerId}/stats/cs2`, { headers });
+        const stats = statsResp.ok ? await statsResp.json() : null;
+        return { nickname: nick, player, stats };
+      } catch (err) {
+        return { nickname: nick, error: 'internal', details: err.message };
+      }
+    }));
+    lastDashboardResults = results;
     renderDashboardSorted();
   } catch (err) {
     result.innerHTML = `<div class="card">Network error: ${err.message}</div>`;
